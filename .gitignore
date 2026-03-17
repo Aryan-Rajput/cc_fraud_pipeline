@@ -1,0 +1,32 @@
+# Terraform
+/terraform/.terraform/
+/terraform/terraform.tfstate
+/terraform/terraform.tfstate.backup
+/terraform/.terraform.lock.hcl
+
+# AWS credentials (never commit these)
+.aws/
+*.pem
+*.key
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/profiles.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+env/
+
+# Snowflake credentials
+*.cfg
+config.yml
+
+# OS files
+.DS_Store
+Thumbs.db
