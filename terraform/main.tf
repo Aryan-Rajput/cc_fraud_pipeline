@@ -11,9 +11,9 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
-# resource "aws_s3_bucket" "bronze" {
-#   bucket = "cc-fraud-pipeline-ar"
-# }
+resource "aws_s3_bucket" "bronze" {
+  bucket = "cc-fraud-pipeline-ar"
+}
 
 resource "aws_iam_role" "glue_role" {
   name = "GlueRole-CCFraud"
