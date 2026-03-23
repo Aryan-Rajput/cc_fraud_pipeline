@@ -1,4 +1,6 @@
 import sys
+import boto3
+import json
 
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
@@ -7,26 +9,35 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from pyspark.sql.functions import current_timestamp
 
-from env import SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE
-from env import SNOWFLAKE_ACCOUNT, SNOWFLAKE_DATABASE, SNOWFLAKE_SCHEMA
-
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
-sc = sparkContext()
+sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-S3_path = "s3://cc-fraud-pipeline-ar//bronze//transactions/"
+S3_path = "s3://cc-fraud-pipeline-ar/bronze/transactions/"
+
+def get_secret():
+    client = boto3.client(
+        service_name='secretsmanager',
+        region_name='ap-southeast-1'
+    )
+    secret = client.get_secret_value(
+        SecretId='cc-fraud/snowflake'
+    )
+    return json.loads(secret['SecretString'])
+
+creds = get_secret()
 
 SNOWFLAKE_OPTIONS = {
-    "sfURL": os.environ.get("SNOWFLAKE_ACCOUNT") + ".snowflakecomputing.com",
-    "sfUser": os.environ.get("SNOWFLAKE_USER"),
-    "sfPassword": os.environ.get("SNOWFLAKE_PASSWORD"),
-    "sfDatabase": os.environ.get("SNOWFLAKE_DATABASE"),
-    "sfSchema": os.environ.get("SNOWFLAKE_SCHEMA"),
-    "sfWarehouse": os.environ.get("SNOWFLAKE_WAREHOUSE"),
+    "sfURL": creds["sfURL"],
+    "sfUser": creds["sfUser"],
+    "sfPassword": creds["sfPassword"],
+    "sfDatabase": creds["sfDatabase"],
+    "sfSchema": creds["sfSchema"],
+    "sfWarehouse": creds["sfWarehouse"],
     "dbtable": "RAW_TRANSACTIONS"
 }
 
@@ -36,6 +47,8 @@ df = spark.read \
     .option("header", "true") \
     .option("inferSchema", "true") \
     .csv(S3_path)
+    
+df = df.drop("_c0")
 
 df = df.withColumn("load_timestamp", current_timestamp())
 
