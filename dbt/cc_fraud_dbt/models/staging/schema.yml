@@ -1,0 +1,39 @@
+version: 2
+
+sources:
+  - name: staging
+    database: CC_FRAUD_SILVER
+    schema: STAGING
+    tables:
+      - name: raw_transactions
+        description: "Raw credit card transactions loaded from S3 via Glue"
+
+models:
+  - name: stg_transactions
+    description: "Cleaned, typed, incremental Silver staging model"
+    columns:
+      - name: trans_num
+        description: "Unique transaction ID — primary key"
+        tests:
+          - unique
+          - not_null
+      - name: amount
+        description: "Transaction amount in USD"
+        tests:
+          - not_null
+      - name: is_fraud
+        description: "Fraud label: 0 = legitimate, 1 = fraud"
+        tests:
+          - not null
+          - accepted_values:
+              config:
+                severity: error
+              arguments: [0, 1]
+      - name: category
+        description: "Transaction category e.g. grocery_pos"
+        tests:
+          - not_null
+      - name: transaction_at
+        description: "Transaction timestamp"
+        tests:
+          - not_null
