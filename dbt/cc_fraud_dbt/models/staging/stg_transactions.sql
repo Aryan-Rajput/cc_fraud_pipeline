@@ -4,21 +4,28 @@
     on_schema_change='fail'
 ) }}
 
-with source as(
-    select * from {{ source('staging', 'raw_transactions') }}
+WITH source AS (
+    SELECT *,
+        TO_TIMESTAMP(
+            LTRIM(REPLACE(trans_date_trans_time, 'Z ', '')),
+            'YYYY-MM-DD HH24:MI:SS.FF9'
+        ) AS parsed_timestamp,
+        SHA2(r.cc_num, 256) AS cc_num_token_raw
+    FROM {{ source('staging', 'raw_transactions') }} r
     {% if is_incremental() %}
-        where load_timestamp > (select MAX(load_timestamp) from {{ this }})
+      WHERE load_timestamp > (SELECT MAX(load_timestamp) FROM {{ this }})
     {% endif %}
 ),
 
 cleaned as(
     SELECT
         trans_num,
-        trans_date_trans_time::TIMESTAMP       AS transaction_at,
-        DATE(trans_date_trans_time)            AS transaction_date,
-        HOUR(trans_date_trans_time)            AS transaction_hour,
-        DAYOFWEEK(trans_date_trans_time)       AS day_of_week,
-        cc_num,
+        parsed_timestamp                        AS transaction_at,
+        DATE(parsed_timestamp)                 AS transaction_date,
+        HOUR(parsed_timestamp)                 AS transaction_hour,
+        DAYOFWEEK(parsed_timestamp)            AS day_of_week,
+        cc_num                                 AS cc_num,
+        cc_num_token_raw                       AS cc_num_token,
         merchant,
         LOWER(TRIM(category))                  AS category,
         ROUND(amt::FLOAT, 2)                   AS amount,
@@ -31,8 +38,14 @@ cleaned as(
         long,
         city_pop,
         job,
-        DOB::DATE                              AS date_of_birth,
-        DATEDIFF('year', DOB::DATE, CURRENT_DATE()) AS customer_age,
+        TO_DATE(
+            LTRIM(REPLACE(DOB, 'Z ', '')),
+            'YYYY-MM-DD HH24:MI:SS.FF9'
+        ) AS date_of_birth,
+        DATEDIFF('year',
+            TO_DATE(LTRIM(REPLACE(DOB, 'Z ', '')), 'YYYY-MM-DD HH24:MI:SS.FF9'),
+            CURRENT_DATE()
+        ) AS customer_age,
         merch_lat,
         merch_long,
         is_fraud::INTEGER                      AS is_fraud,

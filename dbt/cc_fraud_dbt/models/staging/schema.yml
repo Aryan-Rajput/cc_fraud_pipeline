@@ -14,26 +14,32 @@ models:
     columns:
       - name: trans_num
         description: "Unique transaction ID — primary key"
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: amount
         description: "Transaction amount in USD"
-        tests:
+        data_tests:
           - not_null
+          - name: amount_range_check
+            test_name: dbt_utils.accepted_range
+            arguments:
+              min_value: 0
+              max_value: 50000
       - name: is_fraud
         description: "Fraud label: 0 = legitimate, 1 = fraud"
-        tests:
-          - not null
-          - accepted_values:
-              config:
-                severity: error
-              arguments: [0, 1]
+        data_tests:
+          - name: is_fraud_accepted_values
+            test_name: accepted_values
+            arguments:
+              values:
+                - 0
+                - 1
       - name: category
         description: "Transaction category e.g. grocery_pos"
-        tests:
+        data_tests:
           - not_null
       - name: transaction_at
         description: "Transaction timestamp"
-        tests:
+        data_tests:
           - not_null

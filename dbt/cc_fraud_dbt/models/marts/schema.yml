@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: mart_risk_signals
+    description: "Flags statistically anomalous card behaviour using z-scores"
+    columns:
+      - name: cc_num_token
+        data_tests:
+          - not_null
+      - name: transaction_date
+        data_tests:
+          - not_null
+      - name: txn_z_score
+        data_tests:
+          - not_null
+      - name: high_velocity_flag
+        data_tests:
+          - not_null
+      - name: high_spend_flag
+        data_tests:
+          - not_null
+  - name: mart_spend_analytics
+    description: "Spend analytics aggregated by transaction category"
+    columns:
+      - name: category
+        data_tests:
+          - unique
+          - not_null
+      - name: total_spend
+        data_tests:
+          - not_null
+  - name: mart_customer_rfm
+    description: "RFM segmentation — one row per unique card"
+    columns:
+      - name: cc_num_token
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_segment
+        data_tests:
+          - not_null
+          - name: is_accepted_segment
+            test_name: accepted_values
+            arguments:
+              values:
+                - Champion
+                - Loyal Customer
+                - New Customer
+                - At Risk
+                - Lost Customer
+                - Potential Loyalist

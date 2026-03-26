@@ -31,9 +31,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   cc_fraud_dbt:
     staging:
-      +materialized: view
+      +materialized: incremental
       +schema: STAGING
     marts:
-      +materialized: view
+      +materialized: table
       +schema: MARTS
       +database: CC_FRAUD_GOLD
