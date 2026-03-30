@@ -69,4 +69,5 @@ jobs:
           DBT_PROFILES_DIR: ${{ github.workspace }}/dbt/cc_fraud_dbt/profiles
         run: |
           cd dbt/cc_fraud_dbt
+          dbt deps
           sqlfluff lint models/ --dialect snowflake --templater dbt
