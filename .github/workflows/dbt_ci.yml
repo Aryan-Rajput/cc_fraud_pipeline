@@ -62,6 +62,10 @@ jobs:
         run: pip install sqlfluff sqlfluff-templater-dbt dbt-snowflake==1.11.3
 
       - name: Run sqlfluff lint
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
           cd dbt/cc_fraud_dbt
-          sqlfluff lint models/ --dialect snowflake --templater dbt
+          sqlfluff lint models/ --dialect snowflake --templater dbt --profiles-dir ./profiles
