@@ -1,0 +1,9 @@
+[sqlfluff]
+templater = dbt
+dialect = snowflake
+exclude_rules = LT02,LT01,LT09,LT05,LT12
+
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = ./profiles
+profile = cc_fraud_dbt
