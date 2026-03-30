@@ -1,0 +1,13 @@
+cc_fraud_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: DBT_ROLE
+      database: CC_FRAUD_SILVER
+      warehouse: CC_FRAUD_WH
+      schema: RAW
+      threads: 4
