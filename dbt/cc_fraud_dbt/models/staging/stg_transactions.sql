@@ -1,6 +1,7 @@
 {{config(
     materialized='incremental',
     unique_key='trans_num',
+    incremental_strategy='merge',
     on_schema_change='fail'
 ) }}
 

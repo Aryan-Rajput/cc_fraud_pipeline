@@ -48,4 +48,19 @@ models:
                 - New Customer
                 - At Risk
                 - Lost Customer
-                - Potential Loyalist
+                - Potential Loyalist  
+  - name: mart_fraud_summary
+    description: "Fraud metrics across category, state and hour dimensions"
+    columns:
+      - name: dimension
+        data_tests:
+          - not_null
+      - name: value
+        data_tests:
+          - not_null
+      - name: fraud_rate_pct
+        data_tests:
+          - not_null
+      - name: total_txns
+        data_tests:
+          - not_null

@@ -7,7 +7,8 @@ from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, col
+from pyspark.sql.types import StringType
 
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
@@ -50,6 +51,9 @@ df = spark.read \
     
 df = df.drop("_c0")
 
+df = df.withColumn("cc_num", col("cc_num").cast(StringType()))
+df = df.withColumn("zip", col("zip").cast(StringType()))
+
 df = df.withColumn("load_timestamp", current_timestamp())
 
 # WRITING DATA
@@ -57,7 +61,7 @@ df = df.withColumn("load_timestamp", current_timestamp())
 df.write \
     .format("net.snowflake.spark.snowflake") \
     .options(**SNOWFLAKE_OPTIONS) \
-    .mode("append") \
+    .mode("overwrite") \
     .save()
 
 job.commit()
