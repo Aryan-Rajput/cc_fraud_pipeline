@@ -68,4 +68,4 @@ jobs:
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         run: |
           cd dbt/cc_fraud_dbt
-          sqlfluff lint models/ --dialect snowflake --templater dbt --profiles-dir dbt/cc_fraud_dbt/profiles
+          sqlfluff lint models/ --dialect snowflake --templater dbt
