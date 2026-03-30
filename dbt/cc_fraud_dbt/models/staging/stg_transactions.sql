@@ -14,7 +14,7 @@ WITH source AS (
         SHA2(r.cc_num, 256) AS cc_num_token_raw
     FROM {{ source('staging', 'raw_transactions') }} r
     {% if is_incremental() %}
-      WHERE load_timestamp > (SELECT MAX(load_timestamp) FROM {{ this }})
+      WHERE load_timestamp > (SELECT COALESCE(MAX(load_timestamp), '1990-01-01') FROM {{ this }})
     {% endif %}
 ),
 
