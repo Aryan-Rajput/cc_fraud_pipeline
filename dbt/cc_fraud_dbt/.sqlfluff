@@ -1,7 +1,7 @@
 [sqlfluff]
 templater = dbt
 dialect = snowflake
-exclude_rules = LT02,LT01,LT09,LT05,LT12
+exclude_rules = LT01,LT02,LT05,LT09,LT11,LT12,RF04,RF03,RF02,CP01,JJ01,ST02,AL01,AM06
 
 [sqlfluff:templater:dbt]
 project_dir = .

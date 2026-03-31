@@ -2,7 +2,7 @@
 
 WITH base AS (
     -- All transactions including both fraud and legitimate
-    SELECT * FROM {{ ref('stg_transactions') }}
+    SELECT * FROM {{ ref('stg_transactions') }} 
 ),
 
 -- Fraud breakdown by transaction category
@@ -80,5 +80,11 @@ by_hour AS (
 -- Combine all three dimensions into one table
 -- Power BI filters by the dimension column to switch between views
 SELECT * FROM by_category
-UNION ALL SELECT * FROM by_state
-UNION ALL SELECT * FROM by_hour
+
+UNION ALL 
+
+SELECT * FROM by_state
+
+UNION ALL 
+
+SELECT * FROM by_hour
