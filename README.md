@@ -6,9 +6,11 @@ A production-style data engineering project that ingests 1.85M+ credit card tran
 
 ## Why this project exists
 
-Most data engineering tutorials stop at "load a CSV into a database." This project doesn't. The goal was to build something that mirrors what a real pipeline looks like end-to-end: raw data lands in object storage, gets transformed through layered models, tested at every stage, orchestrated on a schedule, and deployed through a CI/CD pipeline — not run manually.
+I built this pipeline because I want to know how a real pipeline actually looks like. So I gave myself one rule that was that i should use somthing that is used somwhere in the production enviorment as i dont know much about production env i just made the most out of what i got out of checking what does prod env actually use (which was mostly just google search and some yt vids) in this the data lands in object storage (s3), moves through layered transformations, gets tested at every stage, runs on a schedule, and deploys through CI/CD. Nothing is triggered manually
+ 
+The dataset is synthetic credit card transaction data (~1.85M rows) from Kaggle (this was the best one that i could work with) honestly understanding the data itself wasn't the hard part it was everything else around it like making the pipeline safe to re-run, handling schema drift I didn't thought about, masking PII the right way rather than just dropping the column, and building the risk model on actual statistics instead of just multiplying averages by some number that's what I have done 
 
-The dataset is synthetic credit card transaction data (~1.85M rows) from Kaggle. The interesting engineering problem isn't the data itself, it's everything around it: making the pipeline idempotent, handling schema drift, masking PII the right way, and building analytics that are actually grounded in statistics rather than arbitrary thresholds.
+let me know if there is somthing more i could have done in this 
 
 ---
 
@@ -20,7 +22,7 @@ Kaggle CSV → AWS S3 → AWS Glue → Snowflake → dbt → Apache Airflow → 
 
 | Layer | Tool |
 |---|---|
-| Object storage | AWS S3 (ap-southeast-1) |
+| Object storage | AWS S3 (ap-southeast-1) singapore |
 | ETL | AWS Glue (PySpark) |
 | Data warehouse | Snowflake |
 | Transformation | dbt 1.11.7 |
@@ -36,8 +38,8 @@ Kaggle CSV → AWS S3 → AWS Glue → Snowflake → dbt → Apache Airflow → 
 **Medallion (Bronze → Silver → Gold)**
 
 - **Bronze** — Raw CSVs land in S3 as-is. No transformation, no cleaning. This layer is immutable.
-- **Silver** — Glue ETL extracts from S3 and loads into Snowflake (`CC_FRAUD_SILVER.STAGING`). dbt then runs `stg_transactions` — an incremental merge model that handles deduplication, timestamp cleaning, and PII tokenization.
-- **Gold** — Four analytics marts in `CC_FRAUD_GOLD.MARTS`, each serving a distinct business question.
+- **Silver** — Glue ETL extracts from S3 and loads into Snowflake (`CC_FRAUD_SILVER.STAGING`). dbt then runs `stg_transactions` — an incremental merge model that handles deduplication, timestamp cleaning, and PII tokenization
+- **Gold** — Four analytics marts in `CC_FRAUD_GOLD.MARTS`, each serving a distinct dashboard in power BI 
 
 ---
 
@@ -71,7 +73,7 @@ dbt's default schema naming logic produces names like `STAGING_STAGING` when the
 
 ## Testing
 
-23 automated tests across all layers, run in CI on every push to main.
+23 automated tests across all layers, run in CI on every push to main
 
 | Model | Tests |
 |---|---|
@@ -81,13 +83,13 @@ dbt's default schema naming logic produces names like `STAGING_STAGING` when the
 | `mart_risk_signals` | 6 |
 | `mart_fraud_summary` | 4 |
 
-Tests cover: uniqueness, not-null, accepted values, and referential integrity. In the Airflow DAG, staging tests run before the mart models are built — a test failure blocks downstream execution rather than propagating bad data silently.
+Tests cover: uniqueness, not-null, accepted values, and referential integrity. In the Airflow DAG, staging tests run before the mart models are built — a test failure blocks downstream execution rather than propagating bad data silently
 
 ---
 
 ## CI/CD
 
-Two jobs run on every push to `main`:
+Two jobs run on every push to `main` -- 
 
 1. **dbt-test** — installs dbt, runs `dbt deps`, `dbt compile`, and all 23 tests against Snowflake using GitHub Secrets for credentials.
 2. **sqlfluff-lint** — lints all SQL models against the Snowflake dialect using a custom `.sqlfluff` config with project-specific exclusions.
@@ -175,5 +177,3 @@ This project uses real cloud infrastructure — there's no local-only version. T
 The Terraform config in `/terraform/main.tf` handles Snowflake resource provisioning. The Glue script and dbt profiles use environment variables for credentials — no secrets are hardcoded anywhere in the repo.
 
 ---
-
-*Built as a portfolio project to demonstrate end-to-end data engineering on real cloud infrastructure.*
