@@ -41,6 +41,8 @@ Kaggle CSV → AWS S3 → AWS Glue → Snowflake → dbt → Apache Airflow → 
 - **Silver** — Glue ETL extracts from S3 and loads into Snowflake (`CC_FRAUD_SILVER.STAGING`). dbt then runs `stg_transactions` — an incremental merge model that handles deduplication, timestamp cleaning, and PII tokenization
 - **Gold** — Four analytics marts in `CC_FRAUD_GOLD.MARTS`, each serving a distinct dashboard in power BI 
 
+![Architecture](assets/architecture.png)
+
 ---
 
 ## Gold Layer: What got built and why
